@@ -1,56 +1,46 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-import requests
+from starlette.responses import RedirectResponse
 import os
+
+from .llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
 
 app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="./llama_app/static"), name="static")
 
-PROJECT_ID = "108524135261"
-ENDPOINT_ID = "8443336706668625920"
-REGION = "us-central1"
-INPUT_DATA_FILE = "scripts/input.json"
+PROJECT_ID = os.environ.get("PROJECT_ID")
+ENDPOINT_ID = os.environ.get("ENDPOINT_ID")
+REGION = os.environ.get("REGION")
 
-GCLOUD_ENDPOINT = f"https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/endpoints/{ENDPOINT_ID}:predict"
+if not (PROJECT_ID and ENDPOINT_ID and REGION):
+    raise Exception("PROJECT_ID, ENDPOINT_ID, and REGION must be set as environment variables")
 
-def get_gcloud_token():
-    try:
-        token = os.popen('gcloud auth print-access-token').read().strip()
-        return token
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error fetching gcloud token")
+
+if os.getenv("LLM_TYPE") == "mock":
+    llm = MockLLMService()
+else:
+    config = VertexConfig(
+        project_id=PROJECT_ID,
+        endpoint_id=ENDPOINT_ID,
+        region=REGION
+    )
+    llm = GCPLlamaService(config)
     
-class Prompt(BaseModel):
-    prompt: str
-
 
 @app.post("/predict")
 async def predict(prompt: Prompt):
     try:
-        token = get_gcloud_token()
-
-        payload = {
-            "instances": [
-                {"prompt": prompt.prompt},
-            ]
-        }
-        headers = {
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json"
-        }
-        response = requests.post(GCLOUD_ENDPOINT, json=payload, headers=headers)
-
-        print(response)
-        
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise HTTPException(status_code=response.status_code, detail=response.text)
+        response = llm.predict({"instances": [prompt]})
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    return response
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+# at root redirect to /static/index.html
+@app.get("/")
+def index():
+    return RedirectResponse(url="/static/index.html")
