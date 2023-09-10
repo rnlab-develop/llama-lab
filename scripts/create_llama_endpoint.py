@@ -61,8 +61,10 @@ if __name__ == "__main__":
     deploy_model_with_dedicated_resources_sample(
         project="sandbox-378304",
         location="us-central1",
-        model_name="llama2-70b-chat-001",
-        machine_type="n1-standard-8",
+        model_name="llama2-7b-chat-001",
+        machine_type="n1-standard-4",
+        accelerator_type="NVIDIA_TESLA_T4",
+        accelerator_count=1,
         min_replica_count=1,
         max_replica_count=1,
         sync=True,
