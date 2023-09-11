@@ -4,9 +4,7 @@ import requests
 url = "http://127.0.0.1:8000/predict"
 
 # JSON payload that needs to be sent
-payload = {
-    "prompt": "What are marge simpson's husband's name?"
-}
+payload = {"prompt": "What are marge simpson's husband's name?"}
 
 # Sending a POST request to the FastAPI endpoint
 response = requests.post(url, json=payload)

@@ -1,22 +1,28 @@
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
+
 import requests
-from typing import Optional, Dict, Any, Union
+from pydantic import BaseModel
+
 from llama_app.enums import TaskType
+from llama_app.settings import VertexEmbedConfig
+from llama_app.utilities import get_gcp_token
 
 
-@dataclass
-class VertexEmbedConfig:
-    project_id: str
-    endpoint_id: str
-    region: str
+class Content(BaseModel):
+    content: str
+
+
+class EmbedRequest(BaseModel):
+    instances: List[Content]
 
 
 class EmbeddingsService:
     BASE_URL: str = "https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/{REGION}/publishers/google/models/{EMBED_ENDPOINT_ID}:predict"
 
-    def __init__(self, vertex_config: VertexEmbedConfig, token: str) -> None:
+    def __init__(self, vertex_config: VertexEmbedConfig, token: str = None) -> None:
         self.project_id: str = vertex_config.project_id
-        self.token: str = token
+        self.token: str = token or get_gcp_token()
         self.region: str = vertex_config.region
         self.endpoint: str = vertex_config.endpoint_id
         self.headers: Dict[str, str] = {
@@ -24,7 +30,12 @@ class EmbeddingsService:
             "Content-Type": "application/json",
         }
 
-    def predict(self, content: str, title: Optional[str] = None, task_type: TaskType = TaskType.RETRIEVAL_DOCUMENT) -> Union[Dict[str, Any], Any]:
+    def predict(
+        self,
+        content: str,
+        title: Optional[str] = None,
+        task_type: TaskType = TaskType.RETRIEVAL_DOCUMENT,
+    ) -> Union[Dict[str, Any], Any]:
         """
         Makes a prediction to get embeddings for the provided text.
         """

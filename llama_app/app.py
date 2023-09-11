@@ -1,16 +1,14 @@
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import RedirectResponse
 import logging
 import os
 
-from llama_app.llm import (
-    GCPLlamaService,
-    MockLLMService,
-    Prompt,
-    VertexConfig,
-    LlamaRequest,
-)
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
+from starlette.responses import RedirectResponse
+
+from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
+from llama_app.llm import (GCPLlamaService, LlamaRequest, MockLLMService,
+                           Prompt, VertexLLMConfig)
+from llama_app.settings import SETTINGS
 
 logger = logging.getLogger(__name__)
 
@@ -31,8 +29,13 @@ if not (PROJECT_ID and ENDPOINT_ID and REGION):
 if os.getenv("LLM_TYPE") == "mock":
     llm = MockLLMService()
 else:
-    config = VertexConfig(project_id=PROJECT_ID, endpoint_id=ENDPOINT_ID, region=REGION)
+    config = VertexLLMConfig(
+        project_id=PROJECT_ID, endpoint_id=ENDPOINT_ID, region=REGION
+    )
     llm = GCPLlamaService(config)
+
+
+gecko = EmbeddingsService(SETTINGS.embeddings)
 
 
 def _configure_db(component: FastAPI) -> None:
@@ -56,6 +59,16 @@ async def predict(prompt: Prompt):
 @app.get("/liveness")
 def liveness():
     return True
+
+
+@app.post("/embeddings")
+async def embeddngs(content: Content):
+    request = EmbedRequest(instances=[content])
+    try:
+        response = gecko.predict(request)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    return response
 
 
 # at root redirect to /static/index.html

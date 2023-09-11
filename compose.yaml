@@ -1,20 +1,21 @@
 version: "3.9"
 services:
-  vector-postgres:
+  pgvector:
     build:
       context: .
       dockerfile: docker/pgvector.dockerfile
     ports:
       - "5432:5432"
     environment:
-      POSTGRES_PASSWORD: yourpassword
-      POSTGRES_USER: youruser
-      POSTGRES_DB: yourdb
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
 
   llama-app:
     environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/service-account-key.json
       - ENV=docker
       - PROJECT_ID=production-397416
       - ENDPOINT_ID=8535660499029721088
@@ -27,8 +28,9 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - vector_postgres
+      - pgvector
     volumes:
       - ".:/app"
+      - /home/rita/Desktop/local/llama-lab/secrets/production-397416-25b4cdf035c6.json:/tmp/keys/service-account-key.json
 volumes:
   pgdata:

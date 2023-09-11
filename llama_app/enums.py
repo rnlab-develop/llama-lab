@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class TaskType(Enum):
     RETRIEVAL_QUERY = "RETRIEVAL_QUERY"
     RETRIEVAL_DOCUMENT = "RETRIEVAL_DOCUMENT"
