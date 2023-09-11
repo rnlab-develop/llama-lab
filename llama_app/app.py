@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
 import os
 
-from .llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
+from llama_app.llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
 
 app = FastAPI()
 
@@ -14,19 +14,17 @@ ENDPOINT_ID = os.environ.get("ENDPOINT_ID")
 REGION = os.environ.get("REGION")
 
 if not (PROJECT_ID and ENDPOINT_ID and REGION):
-    raise Exception("PROJECT_ID, ENDPOINT_ID, and REGION must be set as environment variables")
+    raise Exception(
+        "PROJECT_ID, ENDPOINT_ID, and REGION must be set as environment variables"
+    )
 
 
 if os.getenv("LLM_TYPE") == "mock":
     llm = MockLLMService()
 else:
-    config = VertexConfig(
-        project_id=PROJECT_ID,
-        endpoint_id=ENDPOINT_ID,
-        region=REGION
-    )
+    config = VertexConfig(project_id=PROJECT_ID, endpoint_id=ENDPOINT_ID, region=REGION)
     llm = GCPLlamaService(config)
-    
+
 
 @app.post("/predict")
 async def predict(prompt: Prompt):
@@ -36,11 +34,19 @@ async def predict(prompt: Prompt):
         raise HTTPException(status_code=500, detail=str(e))
     return response
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/liveness")
+def liveness():
+    return True
+
 
 # at root redirect to /static/index.html
 @app.get("/")
 def index():
     return RedirectResponse(url="/static/index.html")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(app, host="0.0.0.0", port=8000)

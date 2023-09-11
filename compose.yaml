@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  vector-postgres:
+    build:
+      context: .
+      dockerfile: docker/pgvector.dockerfile
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_USER: youruser
+      POSTGRES_DB: yourdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  llama-app:
+    environment:
+      - ENV=docker
+      - PROJECT_ID=production-397416
+      - ENDPOINT_ID=8535660499029721088
+      - REGION=us-central1
+    build:
+      context: .
+      dockerfile: docker/app.dockerfile
+    container_name: llama-app
+    command: "python -m uvicorn app:app --app-dir /app/llama_app --host 0.0.0.0 --port 5000 --reload"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ".:/app"
+volumes:
+  pgdata:
