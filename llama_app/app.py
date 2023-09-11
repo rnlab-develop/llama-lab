@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
 import os
 
-from .llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
+from .llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig, LlamaRequest
 
 app = FastAPI()
 
@@ -30,15 +30,13 @@ else:
 
 @app.post("/predict")
 async def predict(prompt: Prompt):
+    request = LlamaRequest(instances=[prompt])
     try:
-        response = llm.predict({"instances": [prompt]})
+        response = llm.predict(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return response
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 # at root redirect to /static/index.html
 @app.get("/")

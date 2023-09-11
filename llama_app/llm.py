@@ -2,15 +2,35 @@ import os
 import requests
 from pydantic import BaseModel
 from dataclasses import dataclass
+import google.auth
+import google.auth.transport.requests
+import google.oauth2
+from typing import List
 
 class Prompt(BaseModel):
     prompt: str
+
+class LlamaRequest(BaseModel):
+    instances: List[Prompt]
 
 @dataclass
 class VertexConfig:
     project_id: str
     endpoint_id: str
     region: str
+
+def get_gcp_token() -> str:
+    try:
+        creds = google.auth.default()[0]
+    except Exception as e:
+        raise Exception("error getting credentials")
+    if not creds.token:
+        try:
+            creds.refresh(google.auth.transport.requests.Request())
+        except Exception as e:
+            raise e
+
+    return creds.token
 
 class GCPLlamaService:
     
@@ -20,21 +40,18 @@ class GCPLlamaService:
         self.region = vertex_config.region
         self.endpoint = f"https://us-central1-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.region}/endpoints/{self.endpoint_id}:predict"
 
-    def get_gcloud_token(self):
+    def predict(self, prompt: LlamaRequest):
         try:
-            token = os.popen('gcloud auth print-access-token').read().strip()
-            return token
-        except Exception as e:
-            raise Exception("Error fetching gcloud token")
+            token = get_gcp_token()
 
-    def predict(self, input_data):
-        try:
-            token = self.get_gcloud_token()
             headers = {
                 "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json"
             }
-            response = requests.post(self.GCLOUD_ENDPOINT, headers=headers, json=input_data)
+            x = {
+                "instances": [{"prompt": "hello"}]
+            }
+            response = requests.post(self.endpoint, headers=headers, json=prompt.model_dump())
             if response.status_code == 200:
                 return response.json()
             else:
