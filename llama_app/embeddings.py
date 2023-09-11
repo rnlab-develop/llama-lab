@@ -32,29 +32,24 @@ class EmbeddingsService:
 
     def predict(
         self,
-        content: str,
+        payload: str,
         title: Optional[str] = None,
-        task_type: TaskType = TaskType.RETRIEVAL_DOCUMENT,
     ) -> Union[Dict[str, Any], Any]:
         """
         Makes a prediction to get embeddings for the provided text.
         """
-        if not isinstance(task_type, TaskType):
-            raise ValueError("Invalid task_type. Use values from TaskType Enum.")
-
-        payload: Dict[str, Any] = {
-            "instances": [
-                {
-                    "task_type": task_type.value,
-                    "content": content,
-                }
-            ]
-        }
-
+        # payload: Dict[str, Any] = {
+        #     "instances": [
+        #         {
+        #             "content": content,
+        #         }
+        #     ]
+        # }
+        print(self.token)
         # Optional title
-        if title:
-            payload["instances"][0]["title"] = title
-
+        # if title:
+        #     payload["instances"][0]["title"] = title
+        print(payload)
         response: requests.Response = requests.post(
             self.BASE_URL.format(
                 PROJECT_ID=self.project_id,
@@ -69,3 +64,9 @@ class EmbeddingsService:
             raise Exception(f"Error {response.status_code}: {response.text}")
 
         return response.json()
+
+
+# curl -X POST \
+#   -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+#   -H "Content-Type: application/json" https://us-central1-aiplatform.googleapis.com/v1/projects/production-397416/locations/us-central1/publishers/google/models/textembedding-gecko:predict -d \
+#   '{"instances": [{"content": "listening to classical music"}]}'

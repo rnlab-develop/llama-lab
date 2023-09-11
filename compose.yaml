@@ -15,7 +15,6 @@ services:
 
   llama-app:
     environment:
-      - GOOGLE_APPLICATION_CREDENTIALS=/tmp/keys/service-account-key.json
       - ENV=docker
       - PROJECT_ID=production-397416
       - ENDPOINT_ID=8535660499029721088
@@ -31,6 +30,6 @@ services:
       - pgvector
     volumes:
       - ".:/app"
-      - /home/rita/Desktop/local/llama-lab/secrets/production-397416-25b4cdf035c6.json:/tmp/keys/service-account-key.json
+      - "/home/rita/.config/gcloud:/home/jovyan/.config/gcloud"
 volumes:
   pgdata:

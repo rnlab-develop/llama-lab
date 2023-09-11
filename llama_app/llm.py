@@ -40,7 +40,7 @@ class GCPLlamaService:
                 "Authorization": f"Bearer {token}",
                 "Content-Type": "application/json",
             }
-            x = {"instances": [{"prompt": "hello"}]}
+            # x = {"instances": [{"prompt": "hello"}]}
             response = requests.post(
                 self.endpoint, headers=headers, json=prompt.model_dump()
             )

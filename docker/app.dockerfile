@@ -1,4 +1,4 @@
-FROM python:slim
+FROM python:3.10-slim
 
 ARG USERNAME=jovyan
 ARG USER_UID=1000
@@ -18,4 +18,4 @@ USER $USERNAME
 WORKDIR /app
 COPY . /app/
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
