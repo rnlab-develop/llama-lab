@@ -9,14 +9,14 @@ class Prompt(BaseModel):
 
 
 @dataclass
-class VertexConfig:
+class VertexLLMConfig:
     project_id: str
     endpoint_id: str
     region: str
 
 
 class GCPLlamaService:
-    def __init__(self, vertex_config: VertexConfig):
+    def __init__(self, vertex_config: VertexLLMConfig):
         self.project_id = vertex_config.project_id
         self.endpoint_id = vertex_config.endpoint_id
         self.region = vertex_config.region
