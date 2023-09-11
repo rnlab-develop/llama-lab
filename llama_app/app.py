@@ -1,9 +1,12 @@
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
+import logging
 import os
 
 from llama_app.llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -26,6 +29,14 @@ else:
     llm = GCPLlamaService(config)
 
 
+def _configure_db(component: FastAPI) -> None:
+    pass
+
+
+_configure_db(app)
+
+
+# TODO: Move these endpoint out of app.py file
 @app.post("/predict")
 async def predict(prompt: Prompt):
     try:
@@ -44,9 +55,3 @@ def liveness():
 @app.get("/")
 def index():
     return RedirectResponse(url="/static/index.html")
-
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
