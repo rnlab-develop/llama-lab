@@ -6,13 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
 
 from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
-from llama_app.llm import (
-    GCPLlamaService,
-    LlamaRequest,
-    MockLLMService,
-    Prompt,
-    VertexLLMConfig,
-)
+from llama_app.llm import (GCPLlamaService, LlamaRequest, MockLLMService,
+                           Prompt, VertexLLMConfig)
 from llama_app.settings import SETTINGS
 
 logger = logging.getLogger(__name__)
@@ -40,10 +35,7 @@ else:
     llm = GCPLlamaService(config)
 
 
-gecko = EmbeddingsService(
-    SETTINGS.embeddings,
-    token="ya29.a0AfB_byA-jSE_EmQrs6VBAG16eKCMlcZzzjV6SVYUEa2UKF0mAs-gn2Dn4v56HU57INivfhtdR0Yzc2gxU__9F86xjuSs9ZuSP3KK6FdB1_26fB8fYCgTJke9VMAdcf-YJE68QZNtLFtanLO3jhO073_j-YIVNNbXTkNWX6-8oo4aCgYKAb0SARESFQGOcNnCW8NO6K2aG5Db0koH6y1JUA0178",
-)
+gecko = EmbeddingsService(SETTINGS.embeddings)
 
 
 def _configure_db(component: FastAPI) -> None:
