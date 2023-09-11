@@ -4,7 +4,13 @@ from starlette.responses import RedirectResponse
 import logging
 import os
 
-from llama_app.llm import GCPLlamaService, MockLLMService, Prompt, VertexConfig
+from llama_app.llm import (
+    GCPLlamaService,
+    MockLLMService,
+    Prompt,
+    VertexConfig,
+    LlamaRequest,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +45,9 @@ _configure_db(app)
 # TODO: Move these endpoint out of app.py file
 @app.post("/predict")
 async def predict(prompt: Prompt):
+    request = LlamaRequest(instances=[prompt])
     try:
-        response = llm.predict({"instances": [prompt]})
+        response = llm.predict(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     return response
