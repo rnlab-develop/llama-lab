@@ -40,3 +40,11 @@ export ENDPOINT_ID=${ENDPOINT_ID:-8443336706668625920}
 export REGION=${REGION:-us-central1}
 python -m pytest llama_app/tests/ --integration
 ```
+
+
+Infrastructure
+
+You can deploy the infrastructure with terraform, use terraform 1.5.7.
+Using https://github.com/robertpeteuil/terraform-installer
+
+./terraform-installer.sh -i 1.5.7
