@@ -8,7 +8,7 @@ document.getElementById('predictForm').addEventListener('submit', async (e) => {
     responseDiv.textContent = 'Loading...';
     
     try {
-        const response = await fetch(window.location.origin + '/predict', {
+        const response = await fetch(window.location.origin + '/api/predict', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
