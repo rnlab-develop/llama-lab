@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  pgvector:
+    build:
+      context: .
+      dockerfile: docker/pgvector.dockerfile
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      
+  liquibase:
+    image: liquibase/liquibase:4.19
+    container_name: liquibase
+    working_dir: /liquibase/changelog
+    command: --defaults-file=liquibase.properties --changelog-file=master-changelog.sql update
+    depends_on:
+      - pgvector
+    volumes:
+      - ./database/:/liquibase/changelog/
+
+  llama-app:
+    environment:
+      - ENV=docker
+      - PROJECT_ID=production-397416
+      - ENDPOINT_ID=8535660499029721088
+      - REGION=us-central1
+    build:
+      context: .
+      dockerfile: docker/app.dockerfile
+    container_name: llama-app
+    command: "python -m uvicorn app:app --app-dir /app/llama_app --host 0.0.0.0 --port 5000 --reload"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - pgvector
+    volumes:
+      - ".:/app"
+      - "/home/rita/.config/gcloud:/home/jovyan/.config/gcloud"
+volumes:
+  pgdata:

@@ -1,2 +1,5 @@
 *venv
+secrets
+.vscode
+*.db.lock
 __pycache__

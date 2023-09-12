@@ -56,6 +56,7 @@ def deploy_model_with_dedicated_resources_sample(
     print(model.resource_name)
     return model
 
+
 if __name__ == "__main__":
     print("Creating Llama Endpoint...")
     deploy_model_with_dedicated_resources_sample(
@@ -70,5 +71,3 @@ if __name__ == "__main__":
         sync=True,
     )
     print("Llama Endpoint Created!")
-
-
