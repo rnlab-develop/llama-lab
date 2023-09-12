@@ -1,6 +1,6 @@
 from faker import Faker
 
-from llama_app.embeddings import Content, EmbedRequest, EmbeddingsService
+from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
 from llama_app.settings import SETTINGS
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
@@ -17,6 +17,7 @@ def generate_paragraph():
 def compute_embeddings(text):
     vector = gecko.predict(payload=EmbedRequest(instances=[Content(content=text)]))
     return vector
+
 
 def generate_dataset():
     data = []
