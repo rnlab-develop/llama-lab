@@ -31,3 +31,12 @@ export REGION=${REGION:-us-central1}
 python -m uvicorn llama_app.app:app
 
 ```
+
+To run integration tests
+
+```bash
+export PROJECT_ID=${PROJECT_ID:-108524135261}
+export ENDPOINT_ID=${ENDPOINT_ID:-8443336706668625920}
+export REGION=${REGION:-us-central1}
+python -m pytest llama_app/tests/ --integration
+```
