@@ -1,7 +1,11 @@
 from faker import Faker
+import psycopg2
+import json
+import os
 
 from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
 from llama_app.settings import SETTINGS
+from dataclasses import asdict
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
 
@@ -19,10 +23,20 @@ def compute_embeddings(text):
     return vector
 
 
-def generate_dataset():
-    data = []
-    for _ in range(1000):  # Generate 1000 fake records
+def insert_into_embeddings(conn, text, vector):
+    cur = conn.cursor()
+    cur.execute("INSERT INTO embeddings (name, vector) VALUES (%s, %s)", (text, vector))
+    conn.commit()
+
+
+def run_insert_dataset(conn):
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".db.lock")
+    if os.path.exists(filepath):
+        return "Database is already populated. Skipping"
+    for _ in range(10):  # Generate 1000 fake records
         text = generate_paragraph()
-        vector = compute_embeddings(text)
-        data.append((text, vector))
-    return data
+        vector = compute_embeddings(text)["predictions"][0]["embeddings"]["values"]
+        insert_into_embeddings(conn, text, json.dumps(vector))
+    with open(filepath, "w+") as f:
+        json.dump("Data load succeeded!", f)
+    return "success"

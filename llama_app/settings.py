@@ -10,12 +10,11 @@ logger = getLogger(__name__)
 
 @dataclass
 class PostgresConnection:
-    drivername: str
-    username: str
+    user: str
     password: str
     host: str
     port: str
-    database: str
+    dbname: str
 
 
 @dataclass
@@ -52,12 +51,11 @@ def DockerSettings() -> Settings:
         env="docker",
         middlewares=[],
         connection=PostgresConnection(
-            drivername="postgresql+pg8000",
-            username="postgres",
+            user="postgres",
             password="postgres",
-            host="postgres",
+            host="pgvector",
             port=5432,
-            database="postgres",
+            dbname="postgres",
         ),
         embeddings=VertexEmbedConfig(
             project_id="production-397416",

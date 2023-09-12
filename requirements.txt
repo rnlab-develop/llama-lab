@@ -3,3 +3,4 @@ fastapi
 uvicorn
 google-auth
 faker
+psycopg2-binary

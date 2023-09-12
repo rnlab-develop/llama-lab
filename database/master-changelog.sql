@@ -7,6 +7,6 @@ CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE embeddings (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    vector VECTOR(512) NOT NULL
+    vector VECTOR(768) NOT NULL
 );
 

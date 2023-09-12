@@ -1,13 +1,21 @@
 import logging
 import os
 
+import psycopg2
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
+from dataclasses import asdict
 
 from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
-from llama_app.llm import (GCPLlamaService, LlamaRequest, MockLLMService,
-                           Prompt, VertexLLMConfig)
+from llama_app.llm import (
+    GCPLlamaService,
+    LlamaRequest,
+    MockLLMService,
+    Prompt,
+    VertexLLMConfig,
+)
+from llama_app.populate.populate_db import run_insert_dataset
 from llama_app.settings import SETTINGS
 
 logger = logging.getLogger(__name__)
@@ -38,8 +46,17 @@ else:
 gecko = EmbeddingsService(SETTINGS.embeddings)
 
 
-def _configure_db(component: FastAPI) -> None:
-    pass
+def _configure_db(_: FastAPI) -> None:
+    with psycopg2.connect(**asdict(SETTINGS.connection)) as conn:
+        logger.info("[!] Validating database connection")
+        cur = conn.cursor()
+        cur.execute(("SELECT 1"))
+        conn.commit()
+        logger.warn(f"[+] DB Connection succeeded!")
+        logger.warn(f"[!] Trying to populate database")
+        status = run_insert_dataset(conn=conn)
+        logger.warn(f"[+] {status}")
+    return
 
 
 _configure_db(app)
