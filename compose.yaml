@@ -12,6 +12,16 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - pgdata:/var/lib/postgresql/data
+      
+  liquibase:
+    image: liquibase/liquibase:4.19
+    container_name: liquibase
+    working_dir: /liquibase/changelog
+    command: --defaults-file=liquibase.properties --changelog-file=master-changelog.sql update
+    depends_on:
+      - pgvector
+    volumes:
+      - ./database/:/liquibase/changelog/
 
   llama-app:
     environment:

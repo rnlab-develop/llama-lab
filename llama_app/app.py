@@ -6,8 +6,13 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
 
 from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
-from llama_app.llm import (GCPLlamaService, LlamaRequest, MockLLMService,
-                           Prompt, VertexLLMConfig)
+from llama_app.llm import (
+    GCPLlamaService,
+    LlamaRequest,
+    MockLLMService,
+    Prompt,
+    VertexLLMConfig,
+)
 from llama_app.settings import SETTINGS
 
 logger = logging.getLogger(__name__)
@@ -63,7 +68,7 @@ def liveness():
 
 @app.post("/embeddings")
 async def embeddngs(content: Content):
-    payload = EmbedRequest(instances=[content]).model_dump()
+    payload = EmbedRequest(instances=[content])
     try:
         response = gecko.predict(payload)
     except Exception as e:

@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Any, Dict, List, Union
 
 import requests
@@ -26,7 +25,7 @@ class EmbeddingsService:
 
     def predict(
         self,
-        payload: str,
+        payload: EmbedRequest,
     ) -> Union[Dict[str, Any], Any]:
         token = get_gcp_token()
         headers: Dict[str, str] = {
@@ -43,7 +42,7 @@ class EmbeddingsService:
                 REGION=self.region,
                 EMBED_ENDPOINT_ID=self.endpoint,
             ),
-            json=payload,
+            json=payload.model_dump(),
             headers=headers,
         )
 
