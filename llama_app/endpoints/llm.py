@@ -1,7 +1,9 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from fastapi import APIRouter, HTTPException
+import psycopg2
 
-from llama_app.clients.embeddings import Content, EmbedRequest, EmbeddingsService
+
+from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
 from llama_app.clients.llm import (
     GCPLlamaService,
     LlamaRequest,
@@ -11,6 +13,8 @@ from llama_app.clients.llm import (
 )
 
 import os
+from llama_app.clients.search import EmbeddingsSearchEngine
+from llama_app.models.search import SearchRequest, SearchResponse
 
 from llama_app.settings import SETTINGS
 
@@ -24,7 +28,6 @@ class Endpoint:
 endpoint = Endpoint(prefix="/api")
 
 # TODO: Move these to the settings; add MOCK as an environment
-
 PROJECT_ID = os.environ.get("PROJECT_ID")
 ENDPOINT_ID = os.environ.get("ENDPOINT_ID")
 REGION = os.environ.get("REGION")
@@ -44,9 +47,6 @@ else:
     llm = GCPLlamaService(config)
 
 
-gecko = EmbeddingsService(SETTINGS.embeddings)
-
-
 @endpoint.router.get("/liveness")
 def liveness():
     return True
@@ -63,9 +63,16 @@ async def predict(prompt: Prompt):
     return response
 
 
+@endpoint.router.post("/search")
+async def search(query: SearchRequest):
+    embeddings_search_engine = EmbeddingsSearchEngine(SETTINGS.connection, gecko)
+    documents = embeddings_search_engine.find_similar_by_text(query.text)
+    return SearchResponse(documents=documents)
+
+
 # TODO: We should split model and embeddings into sub-routes and both should have predict end-point
 @endpoint.router.post("/embeddings")
-async def embeddngs(content: Content):
+async def embeddngs(content: EmbedContent):
     payload = EmbedRequest(instances=[content])
     try:
         response = gecko.predict(payload)

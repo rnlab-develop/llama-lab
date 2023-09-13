@@ -3,7 +3,7 @@ import psycopg2
 import json
 import os
 
-from llama_app.clients.embeddings import Content, EmbeddingsService, EmbedRequest
+from llama_app.clients.embeddings import EmbedContent, EmbeddingsService, EmbedRequest
 from llama_app.settings import SETTINGS
 from dataclasses import asdict
 
@@ -19,7 +19,7 @@ def generate_paragraph():
 
 
 def compute_embeddings(text):
-    vector = gecko.predict(payload=EmbedRequest(instances=[Content(content=text)]))
+    vector = gecko.predict(payload=EmbedRequest(instances=[EmbedContent(content=text)]))
     return vector
 
 

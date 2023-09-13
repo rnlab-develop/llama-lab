@@ -3,16 +3,16 @@ from typing import Any, Dict, List, Union
 import requests
 from pydantic import BaseModel
 
-from llama_app.settings import VertexEmbedConfig
+from llama_app.settings import SETTINGS, VertexEmbedConfig
 from llama_app.utilities import get_gcp_token
 
 
-class Content(BaseModel):
+class EmbedContent(BaseModel):
     content: str
 
 
 class EmbedRequest(BaseModel):
-    instances: List[Content]
+    instances: List[EmbedContent]
 
 
 class EmbeddingsService:
@@ -50,3 +50,5 @@ class EmbeddingsService:
             raise Exception(f"Error {response.status_code}: {response.text}")
 
         return response.json()
+
+gecko = EmbeddingsService(SETTINGS.embeddings)
