@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
 from fastapi import APIRouter, HTTPException
 
-from llama_app.embeddings import Content, EmbedRequest, EmbeddingsService
-from llama_app.llm import (
+from llama_app.clients.embeddings import Content, EmbedRequest, EmbeddingsService
+from llama_app.clients.llm import (
     GCPLlamaService,
     LlamaRequest,
     MockLLMService,
@@ -47,6 +47,11 @@ else:
 gecko = EmbeddingsService(SETTINGS.embeddings)
 
 
+@endpoint.router.get("/liveness")
+def liveness():
+    return True
+
+
 # TODO: Move these endpoint out of app.py file
 @endpoint.router.post("/predict")
 async def predict(prompt: Prompt):
@@ -58,11 +63,7 @@ async def predict(prompt: Prompt):
     return response
 
 
-@endpoint.router.get("/liveness")
-def liveness():
-    return True
-
-
+# TODO: We should split model and embeddings into sub-routes and both should have predict end-point
 @endpoint.router.post("/embeddings")
 async def embeddngs(content: Content):
     payload = EmbedRequest(instances=[content])

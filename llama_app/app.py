@@ -8,7 +8,7 @@ from dataclasses import asdict
 
 from llama_app.populate.populate_db import run_insert_dataset
 from llama_app.settings import SETTINGS
-from llama_app.endpoints import api
+from llama_app.endpoints import llm
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="./llama_app/static"), name="static")
 
 
-COMPONENT_ENDPOINTS = [api.endpoint]
+COMPONENT_ENDPOINTS = [llm.endpoint]
 
 
 def _configure_routers(component: FastAPI) -> None:
