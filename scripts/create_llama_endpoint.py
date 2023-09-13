@@ -60,7 +60,7 @@ def deploy_model_with_dedicated_resources_sample(
 if __name__ == "__main__":
     print("Creating Llama Endpoint...")
     deploy_model_with_dedicated_resources_sample(
-        project="sandbox-378304",
+        project="production-397416",
         location="us-central1",
         model_name="llama2-7b-chat-001",
         machine_type="n1-standard-4",

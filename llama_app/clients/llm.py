@@ -1,8 +1,6 @@
-import os
 from dataclasses import dataclass
 from typing import List
 
-import google.auth.transport.requests
 import google.oauth2
 import requests
 from pydantic import BaseModel
