@@ -58,7 +58,7 @@ def DockerSettings() -> Settings:
             dbname="postgres",
         ),
         embeddings=VertexEmbedConfig(
-            project_id="production-397416",
+            project_id=os.environ.get("PROJECT_ID"),
             region="us-central1",
             endpoint_id="textembedding-gecko",
         ),
