@@ -5,6 +5,8 @@ from typing import List
 import psycopg2
 from llama_app.clients.embeddings import EmbedContent, EmbedRequest
 from llama_app.models.search import Document
+from llama_app.settings import SETTINGS
+from llama_app.clients.embeddings import gecko
 
 
 class EmbeddingsSearchEngine:
@@ -31,3 +33,5 @@ class EmbeddingsSearchEngine:
     def find_similar_by_text(self, text: str) -> List[Document]:
         embeddings = self._fetch_embeddings_from_service(text)
         return self._query_similar_documents_from_db(embeddings)
+
+embeddings_search_engine = EmbeddingsSearchEngine(SETTINGS.connection, gecko)

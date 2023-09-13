@@ -13,7 +13,7 @@ from llama_app.clients.llm import (
 )
 
 import os
-from llama_app.clients.search import EmbeddingsSearchEngine
+from llama_app.clients.search import embeddings_search_engine
 from llama_app.models.search import SearchRequest, SearchResponse
 
 from llama_app.settings import SETTINGS
@@ -55,6 +55,12 @@ def liveness():
 # TODO: Move these endpoint out of app.py file
 @endpoint.router.post("/predict")
 async def predict(prompt: Prompt):
+    response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
+    documents = response.get("documents") or []
+
+    # Logic to add system message:
+    # goes here
+    
     request = LlamaRequest(instances=[prompt])
     try:
         response = llm.predict(request)
@@ -65,7 +71,6 @@ async def predict(prompt: Prompt):
 
 @endpoint.router.post("/search")
 async def search(query: SearchRequest):
-    embeddings_search_engine = EmbeddingsSearchEngine(SETTINGS.connection, gecko)
     documents = embeddings_search_engine.find_similar_by_text(query.text)
     return SearchResponse(documents=documents)
 
