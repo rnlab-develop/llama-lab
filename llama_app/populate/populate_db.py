@@ -3,7 +3,7 @@ import psycopg2
 import json
 import os
 
-from llama_app.embeddings import Content, EmbeddingsService, EmbedRequest
+from llama_app.clients.embeddings import Content, EmbeddingsService, EmbedRequest
 from llama_app.settings import SETTINGS
 from dataclasses import asdict
 
