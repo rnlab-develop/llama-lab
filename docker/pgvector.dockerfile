@@ -1,10 +1,10 @@
-FROM postgres:latest
+FROM postgres:15
 
 # Install dependencies for vector
 RUN apt-get update \
     && apt-get install -y \
         build-essential \
-        postgresql-server-dev-all \
+        postgresql-server-dev-15 \
         git \
         curl
 
