@@ -1,11 +1,8 @@
 from faker import Faker
-import psycopg2
 import json
-import os
 
 from llama_app.clients.embeddings import EmbedContent, EmbeddingsService, EmbedRequest
 from llama_app.settings import SETTINGS
-from dataclasses import asdict
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
 
@@ -28,15 +25,21 @@ def insert_into_embeddings(conn, text, vector):
     cur.execute("INSERT INTO embeddings (name, vector) VALUES (%s, %s)", (text, vector))
     conn.commit()
 
+# we only want to run the data set if no
+def import_has_run(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT count(1) FROM embeddings")
+    res = cur.fetchone()[0]
+    return res != 0
+
 
 def run_insert_dataset(conn):
-    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)), ".db.lock")
-    if os.path.exists(filepath):
-        return "Database is already populated. Skipping"
-    for _ in range(10):  # Generate 1000 fake records
-        text = generate_paragraph()
-        vector = compute_embeddings(text)["predictions"][0]["embeddings"]["values"]
-        insert_into_embeddings(conn, text, json.dumps(vector))
-    with open(filepath, "w+") as f:
-        json.dump("Data load succeeded!", f)
+    if not import_has_run(conn):
+        for _ in range(10):  # Generate 1000 fake records
+            text = generate_paragraph()
+            vector = compute_embeddings(text)["predictions"][0]["embeddings"]["values"]
+            insert_into_embeddings(conn, text, json.dumps(vector))
+            status = "success"
+    else:
+        return "import already ran. success"
     return "success"

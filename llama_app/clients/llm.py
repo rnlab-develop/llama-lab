@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 
-import google.oauth2
 import requests
 from pydantic import BaseModel
 
