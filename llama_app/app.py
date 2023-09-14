@@ -8,14 +8,15 @@ from starlette.responses import RedirectResponse
 from dataclasses import asdict
 
 from llama_app.env import configure_for_local_docker
-configure_for_local_docker()
-
 
 from llama_app.populate.populate_db import run_insert_dataset
 from llama_app.settings import SETTINGS
 from llama_app.endpoints import llm
+from llama_app.middleware import RouteLoggerMiddleware
 
 logger = logging.getLogger(__name__)
+
+configure_for_local_docker()
 
 app = FastAPI()
 

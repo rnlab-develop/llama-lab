@@ -4,7 +4,7 @@ from pathlib import Path
 CREDENTIALS_ENV_VAR="GOOGLE_APPLICATION_CREDENTIALS_JSON"
 
 def is_local_docker_env():
-    is_local = os.environ.get("LOCAL_DOCKER") in ("True", "true", "1", "TRUE")
+    is_local = os.environ.get("ENV").lower() == "docker"
     return is_local
 
 def write_credentials():

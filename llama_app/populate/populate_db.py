@@ -39,4 +39,7 @@ def run_insert_dataset(conn):
             text = generate_paragraph()
             vector = compute_embeddings(text)["predictions"][0]["embeddings"]["values"]
             insert_into_embeddings(conn, text, json.dumps(vector))
+            status = "success"
+    else:
+        return "import already ran. success"
     return "success"
