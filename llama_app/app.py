@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import psycopg2
 from fastapi import FastAPI
@@ -6,11 +7,15 @@ from fastapi.staticfiles import StaticFiles
 from starlette.responses import RedirectResponse
 from dataclasses import asdict
 
+from llama_app.env import configure_for_local_docker
+
 from llama_app.populate.populate_db import run_insert_dataset
 from llama_app.settings import SETTINGS
 from llama_app.endpoints import llm
 
 logger = logging.getLogger(__name__)
+
+configure_for_local_docker()
 
 app = FastAPI()
 

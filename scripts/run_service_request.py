@@ -1,7 +1,7 @@
 import requests
 
 # URL of the FastAPI endpoint
-url = "http://127.0.0.1:8000/predict"
+url = "http://127.0.0.1:5000/api/predict"
 
 # JSON payload that needs to be sent
 payload = {"prompt": "What are marge simpson's husband's name?"}
