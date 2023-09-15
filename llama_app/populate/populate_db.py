@@ -25,6 +25,7 @@ def insert_into_embeddings(conn, text, vector):
     cur.execute("INSERT INTO embeddings (name, vector) VALUES (%s, %s)", (text, vector))
     conn.commit()
 
+
 # we only want to run the data set if no
 def import_has_run(conn):
     cur = conn.cursor()

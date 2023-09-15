@@ -51,4 +51,5 @@ class EmbeddingsService:
 
         return response.json()
 
+
 gecko = EmbeddingsService(SETTINGS.embeddings)

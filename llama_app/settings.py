@@ -31,6 +31,7 @@ class GCPLlamaEndpointConfig:
     endpoint_id: str
     region: str
 
+
 class LLMType(enum.Enum):
     MOCK: str = "mock"
     LLAMA_VERTEX: str = "vertex"
@@ -86,10 +87,11 @@ def DockerSettings() -> Settings:
             config=GCPLlamaEndpointConfig(
                 project_id=os.environ.get("PROJECT_ID", "production-397416"),
                 region="us-central1",
-                endpoint_id="119840170357817344",
+                endpoint_id=os.environ.get("ENDPOINT_ID", "119840170357817344"),
             ),
         ),
     )
+
 
 def MockSettings() -> Settings:
     settings = DockerSettings()
@@ -124,6 +126,10 @@ def get_settings(env: str = None) -> Settings:
     except KeyError:
         logger.warning("[!] Environment is not defined, defaulting to docker")
         return DockerSettings()
+
+
+class SettingsException(Exception):
+    pass
 
 
 SETTINGS = get_settings()

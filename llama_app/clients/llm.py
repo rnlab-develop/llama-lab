@@ -21,7 +21,11 @@ def get_llm_from_settings(settings: settings.Settings):
     if llm_config.llm_type == settings.LLMType.MOCK:
         return MockLLMService()
     elif llm_config.llm_type == settings.LLMType.LLAMA_VERTEX:
-        return GCPLlamaService(llm_config.config.project_id, llm_config.config.region, llm_config.config.endpoint_id)
+        return GCPLlamaService(
+            llm_config.config.project_id,
+            llm_config.config.region,
+            llm_config.config.endpoint_id,
+        )
 
 
 @dataclass
@@ -29,6 +33,7 @@ class VertexLLMConfig:
     project_id: str
     endpoint_id: str
     region: str
+
 
 class BaseLLMService:
     def predict(self, prompt: VertexRequest):
@@ -51,9 +56,11 @@ class GCPLlamaService(BaseLLMService):
                 "Content-Type": "application/json",
             }
             # x = {"instances": [{"prompt": "hello"}]}
+            print(self.endpoint)
             response = requests.post(
                 self.endpoint, headers=headers, json=prompt.model_dump()
             )
+            print(response)
             if response.status_code == 200:
                 return response.json()
             else:

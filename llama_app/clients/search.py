@@ -1,4 +1,3 @@
-
 from dataclasses import asdict
 from typing import List
 
@@ -16,9 +15,13 @@ class EmbeddingsSearchEngine:
 
     def _fetch_embeddings_from_service(self, text: str) -> List[float]:
         payload = EmbedRequest(instances=[EmbedContent(content=text)])
-        return self.embeddings_service.predict(payload)["predictions"][0]["embeddings"]["values"]
+        return self.embeddings_service.predict(payload)["predictions"][0]["embeddings"][
+            "values"
+        ]
 
-    def _query_similar_documents_from_db(self, embeddings: List[float]) -> List[Document]:
+    def _query_similar_documents_from_db(
+        self, embeddings: List[float]
+    ) -> List[Document]:
         documents = []
         with psycopg2.connect(**asdict(self.connection_settings)) as conn:
             with conn.cursor() as cur:
@@ -33,5 +36,6 @@ class EmbeddingsSearchEngine:
     def find_similar_by_text(self, text: str) -> List[Document]:
         embeddings = self._fetch_embeddings_from_service(text)
         return self._query_similar_documents_from_db(embeddings)
+
 
 embeddings_search_engine = EmbeddingsSearchEngine(SETTINGS.connection, gecko)
