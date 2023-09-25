@@ -1,7 +1,8 @@
 import os
 from dataclasses import asdict, dataclass, field
 from logging import getLogger
-from typing import Optional
+from typing import Optional, Any
+import enum
 
 from llama_app.exceptions import EnvironmentNotFoundException
 
@@ -25,11 +26,30 @@ class VertexEmbedConfig:
 
 
 @dataclass
+class GCPLlamaEndpointConfig:
+    project_id: str
+    endpoint_id: str
+    region: str
+
+
+class LLMType(enum.Enum):
+    MOCK: str = "mock"
+    LLAMA_VERTEX: str = "vertex"
+
+
+@dataclass
+class LLMConfig:
+    llm_type: LLMType
+    config: Optional[Any] = None
+
+
+@dataclass
 class Settings:
     env: str
     middlewares: Optional[list] = None
     connection: Optional[PostgresConnection] = None
     embeddings: Optional[VertexEmbedConfig] = None
+    llm: Optional[GCPLlamaEndpointConfig] = None
 
 
 def ProductionSettings() -> Settings:
@@ -58,11 +78,24 @@ def DockerSettings() -> Settings:
             dbname="postgres",
         ),
         embeddings=VertexEmbedConfig(
-            project_id=os.environ.get("PROJECT_ID"),
+            project_id=os.environ.get("PROJECT_ID", "production-397416"),
             region="us-central1",
             endpoint_id="textembedding-gecko",
         ),
+        llm=LLMConfig(
+            llm_type=LLMType.LLAMA_VERTEX,
+            config=GCPLlamaEndpointConfig(
+                project_id=os.environ.get("PROJECT_ID", "production-397416"),
+                region="us-central1",
+                endpoint_id=os.environ.get("ENDPOINT_ID", "119840170357817344"),
+            ),
+        ),
     )
+
+
+def MockSettings() -> Settings:
+    settings = DockerSettings()
+    settings.llm = LLMConfig(llm_type=LLMType.MOCK)
 
 
 @dataclass
@@ -93,6 +126,10 @@ def get_settings(env: str = None) -> Settings:
     except KeyError:
         logger.warning("[!] Environment is not defined, defaulting to docker")
         return DockerSettings()
+
+
+class SettingsException(Exception):
+    pass
 
 
 SETTINGS = get_settings()

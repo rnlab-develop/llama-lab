@@ -1,22 +1,21 @@
 from dataclasses import dataclass, field, asdict
-from fastapi import APIRouter, HTTPException
-import psycopg2
+from fastapi import APIRouter, HTTPException, Depends
+from dataclasses import asdict
 
 
 from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
 from llama_app.clients.llm import (
     GCPLlamaService,
-    LlamaRequest,
+    VertexRequest,
     MockLLMService,
     Prompt,
-    VertexLLMConfig,
+    BaseLLMService,
 )
 
-import os
 from llama_app.clients.search import embeddings_search_engine
 from llama_app.models.search import SearchRequest, SearchResponse
 
-from llama_app.settings import SETTINGS
+from llama_app.settings import SETTINGS, LLMType, SettingsException
 
 
 @dataclass
@@ -27,24 +26,27 @@ class Endpoint:
 
 endpoint = Endpoint(prefix="/api")
 
-# TODO: Move these to the settings; add MOCK as an environment
-PROJECT_ID = os.environ.get("PROJECT_ID")
-ENDPOINT_ID = os.environ.get("ENDPOINT_ID")
-REGION = os.environ.get("REGION")
 
-if not (PROJECT_ID and ENDPOINT_ID and REGION):
-    raise Exception(
-        "PROJECT_ID, ENDPOINT_ID, and REGION must be set as environment variables"
-    )
+def get_llm_from_settings():
+    if SETTINGS.llm.llm_type == LLMType.MOCK:
+        return MockLLMService()
+    elif SETTINGS.llm.llm_type == LLMType.LLAMA_VERTEX:
+        vertex_config = SETTINGS.llm.config
+        if not (
+            vertex_config.project_id
+            and vertex_config.region
+            and vertex_config.endpoint_id
+        ):
+            raise SettingsException(
+                "vertex config requires project_id, region and endpoint_id"
+            )
+        return GCPLlamaService(**asdict(SETTINGS.llm.config))
+    else:
+        raise SettingsException("LLM type not supported")
 
 
-if os.getenv("LLM_TYPE") == "mock":
-    llm = MockLLMService()
-else:
-    config = VertexLLMConfig(
-        project_id=PROJECT_ID, endpoint_id=ENDPOINT_ID, region=REGION
-    )
-    llm = GCPLlamaService(config)
+def get_llm() -> BaseLLMService:
+    return get_llm_from_settings()
 
 
 @endpoint.router.get("/liveness")
@@ -54,14 +56,16 @@ def liveness():
 
 # TODO: Move these endpoint out of app.py file
 @endpoint.router.post("/predict")
-async def predict(prompt: Prompt):
+async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
     response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
-    documents = response.get("documents") or []
+    print("hello")
+    print(response)
+    documents = response
 
     # Logic to add system message:
     # goes here
-    
-    request = LlamaRequest(instances=[prompt])
+
+    request = VertexRequest(instances=[prompt])
     try:
         response = llm.predict(request)
     except Exception as e:
