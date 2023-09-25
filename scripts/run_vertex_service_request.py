@@ -10,8 +10,8 @@ from llama_app.utilities import get_gcp_token
 # https://www.pinecone.io/learn/llama-2/
 
 token = get_gcp_token()
-ENDPOINT_ID = 119840170357817344
-PROJECT_ID = "production-397416"
+ENDPOINT_ID = os.environ.get("ENDPOINT_ID", "119840170357817344")
+PROJECT_ID = os.environ.get("PROJECT_ID", "production-397416")
 REGION = "us-central1"
 URL = f"https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/endpoints/{ENDPOINT_ID}:predict"
 
@@ -26,9 +26,10 @@ You are a helpful, respectful and honest assistant. Always answer as helpfully a
 Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. 
 Please ensure that your responses are socially unbiased and positive in nature.
 <</SYS>>
+[/INST]
 
-Can you write a 100 word paper on the importance of AI?'[/INST]"""
-
+Tell me a joke.
+"""
 
 prompt = {
     "instances": [

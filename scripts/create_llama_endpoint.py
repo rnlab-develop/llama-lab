@@ -3,6 +3,8 @@ from typing import Dict, Optional, Sequence, Tuple
 from google.cloud import aiplatform
 from google.cloud.aiplatform import explain
 
+import os
+
 
 def deploy_model_with_dedicated_resources_sample(
     project,
@@ -60,7 +62,7 @@ def deploy_model_with_dedicated_resources_sample(
 if __name__ == "__main__":
     print("Creating Llama Endpoint...")
     deploy_model_with_dedicated_resources_sample(
-        project="production-397416",
+        project=os.environ["PROJECT_ID"],
         location="us-central1",
         model_name="llama2-7b-chat-001",
         machine_type="n1-standard-4",

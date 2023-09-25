@@ -5,14 +5,27 @@ import requests
 from pydantic import BaseModel
 
 from llama_app.utilities import get_gcp_token
+import llama_app.settings as settings
 
 
 class Prompt(BaseModel):
     prompt: str
 
 
-class LlamaRequest(BaseModel):
+class VertexRequest(BaseModel):
     instances: List[Prompt]
+
+
+def get_llm_from_settings(settings: settings.Settings):
+    llm_config = settings.llm
+    if llm_config.llm_type == settings.LLMType.MOCK:
+        return MockLLMService()
+    elif llm_config.llm_type == settings.LLMType.LLAMA_VERTEX:
+        return GCPLlamaService(
+            llm_config.config.project_id,
+            llm_config.config.region,
+            llm_config.config.endpoint_id,
+        )
 
 
 @dataclass
@@ -22,14 +35,19 @@ class VertexLLMConfig:
     region: str
 
 
-class GCPLlamaService:
-    def __init__(self, vertex_config: VertexLLMConfig):
-        self.project_id = vertex_config.project_id
-        self.endpoint_id = vertex_config.endpoint_id
-        self.region = vertex_config.region
+class BaseLLMService:
+    def predict(self, prompt: VertexRequest):
+        raise NotImplementedError()
+
+
+class GCPLlamaService(BaseLLMService):
+    def __init__(self, project_id, region, endpoint_id):
+        self.project_id = project_id
+        self.endpoint_id = endpoint_id
+        self.region = region
         self.endpoint = f"https://us-central1-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{self.region}/endpoints/{self.endpoint_id}:predict"
 
-    def predict(self, prompt: LlamaRequest):
+    def predict(self, prompt: VertexRequest):
         try:
             token = get_gcp_token()
 
@@ -38,9 +56,11 @@ class GCPLlamaService:
                 "Content-Type": "application/json",
             }
             # x = {"instances": [{"prompt": "hello"}]}
+            print(self.endpoint)
             response = requests.post(
                 self.endpoint, headers=headers, json=prompt.model_dump()
             )
+            print(response)
             if response.status_code == 200:
                 return response.json()
             else:
@@ -49,7 +69,7 @@ class GCPLlamaService:
             raise Exception(str(e))
 
 
-class MockLLMService:
+class MockLLMService(BaseLLMService):
     def predict(self, input_data):
         # Simulate a successful API response
         return {
