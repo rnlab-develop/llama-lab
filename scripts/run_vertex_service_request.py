@@ -9,8 +9,9 @@ from llama_app.utilities import get_gcp_token
 # https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/predict
 # https://www.pinecone.io/learn/llama-2/
 
+
 token = get_gcp_token()
-ENDPOINT_ID = 119840170357817344
+ENDPOINT_ID = 2948100736346488832
 PROJECT_ID = "production-397416"
 REGION = "us-central1"
 URL = f"https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/endpoints/{ENDPOINT_ID}:predict"
@@ -34,7 +35,7 @@ prompt = {
     "instances": [
         {"prompt": prompt},
     ],
-    "parameters": [{"max_new_tokens": 500}],
+    "parameters": {"temperature": 0},
 }
 
 response = requests.post(url=URL, headers=headers, json=prompt)

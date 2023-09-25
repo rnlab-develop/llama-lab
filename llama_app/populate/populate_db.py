@@ -1,7 +1,12 @@
 from faker import Faker
 import json
 
-from llama_app.clients.embeddings import EmbedContent, EmbeddingsService, EmbedRequest
+from llama_app.clients.embeddings import (
+    EmbedContent,
+    EmbeddingsService,
+    EmbedRequest,
+    RetrievalType,
+)
 from llama_app.settings import SETTINGS
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
@@ -16,7 +21,17 @@ def generate_paragraph():
 
 
 def compute_embeddings(text):
-    vector = gecko.predict(payload=EmbedRequest(instances=[EmbedContent(content=text)]))
+    # The API accepts a maximum of 3,072 input tokens and outputs 768-dimensional vector embeddings.
+    vector = gecko.predict(
+        payload=EmbedRequest(
+            instances=[
+                EmbedContent(
+                    content=text,
+                    task_type=RetrievalType.RETRIEVAL_DOCUMENT.value,
+                )
+            ]
+        )
+    )
     return vector
 
 
@@ -24,6 +39,7 @@ def insert_into_embeddings(conn, text, vector):
     cur = conn.cursor()
     cur.execute("INSERT INTO embeddings (name, vector) VALUES (%s, %s)", (text, vector))
     conn.commit()
+
 
 # we only want to run the data set if no
 def import_has_run(conn):
