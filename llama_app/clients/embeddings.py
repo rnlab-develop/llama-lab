@@ -1,14 +1,15 @@
+from dataclasses import Field
+from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
 import requests
 from pydantic import BaseModel
-from enum import Enum
 
 from llama_app.settings import SETTINGS, VertexEmbedConfig
 from llama_app.utilities import get_gcp_token
 
 
-class RetrievalType(Enum):
+class RetrievalType(str, Enum):
     RETRIEVAL_QUERY = "RETRIEVAL_QUERY"
     RETRIEVAL_DOCUMENT = "RETRIEVAL_DOCUMENT"
     SEMANTIC_SIMILARITY = "SEMANTIC_SIMILARITY"
@@ -18,7 +19,7 @@ class RetrievalType(Enum):
 
 class EmbedContent(BaseModel):
     content: str
-    title: Optional[str]
+    title: Optional[str] = None
     task_type: Optional[RetrievalType]
 
 

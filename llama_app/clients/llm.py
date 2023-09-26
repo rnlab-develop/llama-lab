@@ -4,8 +4,8 @@ from typing import List
 import requests
 from pydantic import BaseModel
 
-from llama_app.utilities import get_gcp_token
 import llama_app.settings as settings
+from llama_app.utilities import get_gcp_token
 
 
 class Prompt(BaseModel):
