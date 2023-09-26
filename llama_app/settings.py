@@ -1,8 +1,8 @@
+import enum
 import os
 from dataclasses import asdict, dataclass, field
 from logging import getLogger
-from typing import Optional, Any
-import enum
+from typing import Any, Optional
 
 from llama_app.exceptions import EnvironmentNotFoundException
 
@@ -80,7 +80,7 @@ def DockerSettings() -> Settings:
         embeddings=VertexEmbedConfig(
             project_id=os.environ.get("PROJECT_ID", "production-397416"),
             region="us-central1",
-            endpoint_id="textembedding-gecko",
+            endpoint_id="textembedding-gecko@latest",
         ),
         llm=LLMConfig(
             llm_type=LLMType.LLAMA_VERTEX,

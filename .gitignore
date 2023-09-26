@@ -3,4 +3,4 @@ secrets
 .vscode
 *.db.lock
 __pycache__
-neals_env.sh
+*env.sh

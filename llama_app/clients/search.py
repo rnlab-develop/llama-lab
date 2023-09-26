@@ -2,10 +2,10 @@ from dataclasses import asdict
 from typing import List
 
 import psycopg2
-from llama_app.clients.embeddings import EmbedContent, EmbedRequest
+
+from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
 from llama_app.models.search import Document
 from llama_app.settings import SETTINGS
-from llama_app.clients.embeddings import gecko
 
 
 class EmbeddingsSearchEngine:

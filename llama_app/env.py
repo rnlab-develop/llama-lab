@@ -10,6 +10,7 @@ def is_local_docker_env():
 
 
 def write_credentials():
+    print("writing credentials")
     path = Path("~/.config/gcloud/application_default_credentials.json").expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
     path.touch()

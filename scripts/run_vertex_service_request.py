@@ -1,13 +1,14 @@
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.realpath(__file__))))
 import requests
-from llama_app.utilities import get_gcp_token
 
+from llama_app.utilities import get_gcp_token
 
 # https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.endpoints/predict
 # https://www.pinecone.io/learn/llama-2/
+
 
 token = get_gcp_token()
 ENDPOINT_ID = os.environ.get("ENDPOINT_ID", "119840170357817344")
@@ -35,7 +36,7 @@ prompt = {
     "instances": [
         {"prompt": prompt},
     ],
-    "parameters": [{"max_new_tokens": 500}],
+    "parameters": {"temperature": 0},
 }
 
 response = requests.post(url=URL, headers=headers, json=prompt)

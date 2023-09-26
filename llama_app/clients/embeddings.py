@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Union
+from dataclasses import Field
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from pydantic import BaseModel
@@ -7,8 +9,18 @@ from llama_app.settings import SETTINGS, VertexEmbedConfig
 from llama_app.utilities import get_gcp_token
 
 
+class RetrievalType(str, Enum):
+    RETRIEVAL_QUERY = "RETRIEVAL_QUERY"
+    RETRIEVAL_DOCUMENT = "RETRIEVAL_DOCUMENT"
+    SEMANTIC_SIMILARITY = "SEMANTIC_SIMILARITY"
+    CLASSIFICATION = "CLASSIFICATION"
+    CLUSTERING = "CLUSTERING"
+
+
 class EmbedContent(BaseModel):
     content: str
+    title: Optional[str] = None
+    task_type: Optional[RetrievalType]
 
 
 class EmbedRequest(BaseModel):
@@ -35,7 +47,6 @@ class EmbeddingsService:
         """
         Makes a prediction to get embeddings for the provided text.
         """
-        print(payload)
         response: requests.Response = requests.post(
             self.BASE_URL.format(
                 PROJECT_ID=self.project_id,

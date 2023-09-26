@@ -34,7 +34,6 @@ services:
       - ENDPOINT_ID=${ENDPOINT_ID:-119840170357817344}
       - REGION=us-central1
       - GOOGLE_APPLICATION_CREDENTIALS_JSON=${GOOGLE_APPLICATION_CREDENTIALS_JSON}
-      - LOCAL_DOCKER=true
     build:
       context: .
       dockerfile: docker/app.dockerfile
