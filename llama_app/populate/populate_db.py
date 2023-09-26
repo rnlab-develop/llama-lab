@@ -134,14 +134,11 @@ def insert_into_embeddings(conn, text, vector):
 def run_insert_dataset(conn):
     if not import_has_run(conn):
         for title in ARTICLE_TITLES:  # Generate 1000 fake records
-            text = get_wikipedia_article(title)
-
-            text = clean_html(text)
-            print(text)
+            text = clean_html(get_wikipedia_article(title))
             is_successful, vector = encode_text_to_embedding_batched(
                 [f"Title: {title}. Body: {text}"]
             )
-            if is_successful:
+            if is_successful and text:
                 insert_into_embeddings(conn, text, json.dumps(vector.tolist()))
     else:
         return "import already ran. success"
