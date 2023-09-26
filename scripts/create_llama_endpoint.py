@@ -1,9 +1,8 @@
+import os
 from typing import Dict, Optional, Sequence, Tuple
 
 from google.cloud import aiplatform
 from google.cloud.aiplatform import explain
-
-import os
 
 
 def deploy_model_with_dedicated_resources_sample(
