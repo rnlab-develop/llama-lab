@@ -20,7 +20,7 @@ class RetrievalType(str, Enum):
 class EmbedContent(BaseModel):
     content: str
     title: Optional[str] = None
-    task_type: Optional[RetrievalType]
+    task_type: Optional[RetrievalType] = RetrievalType.RETRIEVAL_DOCUMENT.value
 
 
 class EmbedRequest(BaseModel):

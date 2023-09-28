@@ -26,10 +26,11 @@ class EmbeddingsSearchEngine:
         with psycopg2.connect(**asdict(self.connection_settings)) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "SELECT id, name FROM embeddings ORDER BY vector <-> %s::vector LIMIT 1",
+                    "SELECT id, name FROM embeddings ORDER BY vector <#> %s::vector LIMIT 1",
                     (embeddings,),
                 )
                 result = cur.fetchall()
+                print(result)
                 documents = [Document(id=row[0], name=row[1]) for row in result]
         return documents
 
