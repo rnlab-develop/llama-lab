@@ -21,27 +21,38 @@ B_INST, E_INST = "[INST]", "[/INST]"
 B_SYS, E_SYS = "<<SYS>>\n", "\n<</SYS>>\n\n"
 BOS, EOS = "<s>", "</s>"
 
-DEFAULT_SYSTEM_PROMPT = f"""You are a helpful, respectful and honest assistant. 
-                        Always answer as helpfully as possible, while being safe. Please ensure that your 
-                        responses are socially unbiased and positive in nature. If a question does not make any sense, 
-                        or is not factually coherent, explain why instead of answering something not correct. 
-                        If you don't know the answer to a question, please don't share false information."""
+DEFAULT_SYSTEM_PROMPT = f"""You are a helpful ASSISTANT to USER and you pay close attention to everything 
+                            that is said in a conversation before giving a response. You should answer as 
+                            succinctly as possible, while being safe. There is no need to act conversational, 
+                            you can just give a curt and correct response."""
 
 
-def generate_prompt(messages: List[Inst]):
-    message_string = "\n".join([str(Inst(**m).model_dump()) for m in messages])
+def generate_prompt(new_prompt, history: List[Inst] = []):
+    chat = []
+    for exchange in [Inst(**m).model_dump() for m in history]:
+        if exchange["role"] == "user":
+            chat.append(f"{BOS}{B_INST}{exchange['content']}{E_INST}")
+        elif exchange["role"] == "assistant":
+            chat.append(f"{exchange['content']} {EOS}")
+
     return f"""
-        {BOS} {B_INST} {B_SYS} {DEFAULT_SYSTEM_PROMPT} {E_SYS} {message_string} {E_INST} {EOS}
+        {BOS} {B_INST} {B_SYS} {DEFAULT_SYSTEM_PROMPT} {E_SYS} Hi There! {E_INST} Hi. How can I help? {EOS} 
+            {''.join(chat)} {BOS} {B_INST} {new_prompt} {E_INST}
     """
 
-
 if __name__ == "__main__":
+    import requests
     p = generate_prompt(
+        "can you now subtract 2?",
         [
             {"role": "user", "content": "what is 2+2?"},
             {"role": "assistant", "content": "it's going to be 4"},
-        ]
+            {"role": "user", "content": "multiply that by 3"},
+            {"role": "assistant", "content": "the answer is 12"}
+            
+        ],
     )
     print(p)
 
-
+    r = requests.post("http://localhost:5000/api/predict", json={"prompt": p})
+    print(r.text)

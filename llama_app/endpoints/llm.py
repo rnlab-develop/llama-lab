@@ -67,22 +67,22 @@ async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    message = [
-        {"role": "user", "content": prompt.model_dump()},
-        {"role": "assistant", "content": "it's going to be 4"},
-    ]
+    # message = [
+    #     {"role": "user", "content": prompt.model_dump()},
+    #     {"role": "assistant", "content": "it's going to be 4"},
+    # ]
 
-    with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
-        with closing(conn.cursor()) as cursor:
-            query = sql.SQL(
-                """
-                    INSERT INTO tbl_chat_history (user_id, room_id, timestamp, message)
-                    VALUES (%s, %s, %s, %s)
-                    RETURNING id;
-                """
-            )
-            cursor.execute(query, (1, 1, datetime.now(), json.dumps(message)))
-            conn.commit()
+    # with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
+    #     with closing(conn.cursor()) as cursor:
+    #         query = sql.SQL(
+    #             """
+    #                 INSERT INTO tbl_chat_history (user_id, room_id, timestamp, message)
+    #                 VALUES (%s, %s, %s, %s)
+    #                 RETURNING id;
+    #             """
+    #         )
+    #         cursor.execute(query, (1, 1, datetime.now(), json.dumps(message)))
+    #         conn.commit()
 
     return response
 
