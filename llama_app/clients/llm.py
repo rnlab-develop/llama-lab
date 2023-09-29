@@ -10,6 +10,8 @@ from llama_app.utilities import get_gcp_token
 
 class Prompt(BaseModel):
     prompt: str
+    top_k : int
+    max_length: int
 
 
 class VertexRequest(BaseModel):

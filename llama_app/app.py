@@ -48,6 +48,7 @@ _configure_routers(app)
 _configure_db(app)
 
 
+
 # at root redirect to /static/index.html
 @app.get("/")
 def index():
