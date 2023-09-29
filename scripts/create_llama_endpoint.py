@@ -61,7 +61,7 @@ def deploy_model_with_dedicated_resources_sample(
 if __name__ == "__main__":
     print("Creating Llama Endpoint...")
     deploy_model_with_dedicated_resources_sample(
-        project=os.environ["PROJECT_ID"],
+        project=os.environ.get("PROJECT_ID") or "production-397416",
         location="us-central1",
         model_name="llama2-7b-chat-001",
         machine_type="n1-standard-4",

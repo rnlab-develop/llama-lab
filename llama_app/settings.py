@@ -78,16 +78,16 @@ def DockerSettings() -> Settings:
             dbname="postgres",
         ),
         embeddings=VertexEmbedConfig(
-            project_id=os.environ.get("PROJECT_ID", "production-397416"),
+            project_id=os.environ.get("PROJECT_ID"),
             region="us-central1",
             endpoint_id="textembedding-gecko@latest",
         ),
         llm=LLMConfig(
             llm_type=LLMType.LLAMA_VERTEX,
             config=GCPLlamaEndpointConfig(
-                project_id=os.environ.get("PROJECT_ID", "production-397416"),
+                project_id=os.environ.get("PROJECT_ID"),
                 region="us-central1",
-                endpoint_id=os.environ.get("ENDPOINT_ID", "119840170357817344"),
+                endpoint_id=os.environ.get("ENDPOINT_ID"),
             ),
         ),
     )

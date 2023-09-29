@@ -1,10 +1,20 @@
 from dataclasses import asdict, dataclass, field
 
 from fastapi import APIRouter, Depends, HTTPException
+import psycopg2
+from psycopg2 import sql
+from contextlib import closing
+from datetime import datetime
+import json
 
 from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
-from llama_app.clients.llm import (BaseLLMService, GCPLlamaService,
-                                   MockLLMService, Prompt, VertexRequest)
+from llama_app.clients.llm import (
+    BaseLLMService,
+    GCPLlamaService,
+    MockLLMService,
+    Prompt,
+    VertexRequest,
+)
 from llama_app.clients.search import embeddings_search_engine
 from llama_app.models.search import SearchRequest, SearchResponse
 from llama_app.settings import SETTINGS, LLMType, SettingsException
@@ -50,16 +60,30 @@ def liveness():
 @endpoint.router.post("/predict")
 async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
     response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
-    print(response)
-
-    # Logic to add system message:
-    # goes here
-
     request = VertexRequest(instances=[prompt])
+
     try:
         response = llm.predict(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+    message = [
+        {"role": "user", "content": prompt.model_dump()},
+        {"role": "assistant", "content": "it's going to be 4"},
+    ]
+
+    with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
+        with closing(conn.cursor()) as cursor:
+            query = sql.SQL(
+                """
+                    INSERT INTO tbl_chat_history (user_id, room_id, timestamp, message)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id;
+                """
+            )
+            cursor.execute(query, (1, 1, datetime.now(), json.dumps(message)))
+            conn.commit()
+
     return response
 
 

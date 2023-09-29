@@ -14,7 +14,8 @@ CREATE TABLE tbl_chat_history (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL, 
     room_id INTEGER NOT NULL,
-    ordinal_position INTEGER NOT NULL,
-    message jsonb NOT NULL
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message JSONB NOT NULL
 );
+
 
