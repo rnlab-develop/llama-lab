@@ -1,11 +1,12 @@
 from dataclasses import asdict, dataclass, field
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 import psycopg2
 from psycopg2 import sql
 from contextlib import closing
 from datetime import datetime
 import json
+import itertools
 
 from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
 from llama_app.clients.llm import (
@@ -18,6 +19,7 @@ from llama_app.clients.llm import (
 from llama_app.clients.search import embeddings_search_engine
 from llama_app.models.search import SearchRequest, SearchResponse
 from llama_app.settings import SETTINGS, LLMType, SettingsException
+from llama_app.templates.prompt import generate_prompt
 
 
 @dataclass
@@ -59,30 +61,60 @@ def liveness():
 # TODO: Move these endpoint out of app.py file
 @endpoint.router.post("/predict")
 async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
-    response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
-    request = VertexRequest(instances=[prompt])
+    # response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
+
+    # Get chat context
+    history = []
+    with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
+        with closing(conn.cursor()) as cursor:
+            query = sql.SQL(
+                """
+                SELECT message
+                FROM tbl_chat_history 
+                WHERE user_id = 1 and room_id = 1
+                ORDER BY timestamp DESC
+                LIMIT 2;
+                """
+            )
+            cursor.execute(query)
+            results = cursor.fetchall()
+            for row in results:
+                history.append(row[0])
+
+    generated = generate_prompt(
+        new_prompt=prompt.prompt,
+        history=list(itertools.chain.from_iterable(reversed(history))),
+    )
+    # Validate payload
+    request = VertexRequest(instances=[Prompt(prompt=generated)])
 
     try:
         response = llm.predict(request)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # message = [
-    #     {"role": "user", "content": prompt.model_dump()},
-    #     {"role": "assistant", "content": "it's going to be 4"},
-    # ]
+    prompt_text = prompt.model_dump()["prompt"]
 
-    # with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
-    #     with closing(conn.cursor()) as cursor:
-    #         query = sql.SQL(
-    #             """
-    #                 INSERT INTO tbl_chat_history (user_id, room_id, timestamp, message)
-    #                 VALUES (%s, %s, %s, %s)
-    #                 RETURNING id;
-    #             """
-    #         )
-    #         cursor.execute(query, (1, 1, datetime.now(), json.dumps(message)))
-    #         conn.commit()
+    answer = response["predictions"][0][0]["generated_text"].replace(generated, "")
+
+    message = [
+        {"role": "user", "content": prompt_text},
+        {"role": "assistant", "content": answer},
+    ]
+
+    print(f"Generated: {generated}")
+
+    with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
+        with closing(conn.cursor()) as cursor:
+            query = sql.SQL(
+                """
+                    INSERT INTO tbl_chat_history (user_id, room_id, timestamp, message)
+                    VALUES (%s, %s, %s, %s)
+                    RETURNING id;
+                """
+            )
+            cursor.execute(query, (1, 1, datetime.now(), json.dumps(message)))
+            conn.commit()
 
     return response
 

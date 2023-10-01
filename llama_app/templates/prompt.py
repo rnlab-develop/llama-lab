@@ -40,19 +40,20 @@ def generate_prompt(new_prompt, history: List[Inst] = []):
             {''.join(chat)} {BOS} {B_INST} {new_prompt} {E_INST}
     """
 
+
 if __name__ == "__main__":
     import requests
+
     p = generate_prompt(
         "can you now subtract 2?",
         [
             {"role": "user", "content": "what is 2+2?"},
             {"role": "assistant", "content": "it's going to be 4"},
             {"role": "user", "content": "multiply that by 3"},
-            {"role": "assistant", "content": "the answer is 12"}
-            
+            {"role": "assistant", "content": "the answer is 12"},
         ],
     )
     print(p)
 
     r = requests.post("http://localhost:5000/api/predict", json={"prompt": p})
-    print(r.text)
+    print(r.json())
