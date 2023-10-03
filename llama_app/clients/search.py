@@ -31,10 +31,12 @@ class EmbeddingsSearchEngine:
                 # -1: The vectors point in completely opposite directions (maximum dissimilarity).
 
                 cur.execute(
-                    """ SELECT id, name FROM embeddings
-                        WHERE vector <#> %s::vector > 0
+                    """ SELECT id, name, vector <#> %s::vector 
+                        FROM embeddings
+                        WHERE vector <#> %s::vector > -1
                         ORDER BY vector <#> %s::vector LIMIT 1""",
                     (
+                        embeddings,
                         embeddings,
                         embeddings,
                     ),

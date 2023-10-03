@@ -38,7 +38,9 @@ def generate_prompt(new_prompt, history: List[Inst] = []):
         elif exchange["role"] == "assistant":
             chat.append(f"{exchange['content']} {EOS}")
         elif exchange["role"] == "system":
-            system.append(f"{B_SYS} {exchange['content']} {E_SYS}")
+            system.append(
+                f"{B_SYS} Please use the following context if it is applicable: {exchange['content']} {E_SYS}"
+            )
 
     return f"""
         {BOS} {B_INST} {B_SYS} {DEFAULT_SYSTEM_PROMPT} {E_SYS} {''.join(system)} Hi There! {E_INST} Hi. How can I help? {EOS} 
