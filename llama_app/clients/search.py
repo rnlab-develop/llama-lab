@@ -25,11 +25,19 @@ class EmbeddingsSearchEngine:
         documents = []
         with psycopg2.connect(**asdict(self.connection_settings)) as conn:
             with conn.cursor() as cur:
+                # Cosine similarity: range [-1,1].
+                # 1: The vectors point in the exact same direction (maximum similarity).
+                # 0: The vectors are orthogonal (neutral similarity).
+                # -1: The vectors point in completely opposite directions (maximum dissimilarity).
+
                 cur.execute(
-                    """SELECT id, name FROM embeddings 
-                
-                    ORDER BY vector <#> %s::vector LIMIT 1""",
-                    (embeddings,),
+                    """ SELECT id, name FROM embeddings
+                        WHERE vector <#> %s::vector > 0
+                        ORDER BY vector <#> %s::vector LIMIT 1""",
+                    (
+                        embeddings,
+                        embeddings,
+                    ),
                 )
                 result = cur.fetchall()
                 print(result)
