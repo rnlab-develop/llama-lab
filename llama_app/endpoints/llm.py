@@ -61,10 +61,10 @@ def liveness():
 # TODO: Move these endpoint out of app.py file
 @endpoint.router.post("/predict")
 async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
-    # response = embeddings_search_engine.find_similar_by_text(prompt.prompt)
+    r = embeddings_search_engine.find_similar_by_text(prompt.prompt)
 
     # Get chat context
-    history = []
+    context = []
     with closing(psycopg2.connect(**asdict(SETTINGS.connection))) as conn:
         with closing(conn.cursor()) as cursor:
             query = sql.SQL(
@@ -79,11 +79,15 @@ async def predict(prompt: Prompt, llm: BaseLLMService = Depends(get_llm)):
             cursor.execute(query)
             results = cursor.fetchall()
             for row in results:
-                history.append(row[0])
+                context.append(row[0])
+
+            # append system messages
+            for s in [doc.body for doc in r]:
+                context.append([{"role": "system", "content": s}])
 
     generated = generate_prompt(
         new_prompt=prompt.prompt,
-        history=list(itertools.chain.from_iterable(reversed(history))),
+        history=list(itertools.chain.from_iterable(reversed(context))),
     )
     # Validate payload
     request = VertexRequest(instances=[Prompt(prompt=generated)])

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class Role(Enum):
     assistant = "assistant"
     user = "user"
+    system = "system"
 
 
 class Inst(BaseModel):
@@ -29,14 +30,18 @@ DEFAULT_SYSTEM_PROMPT = f"""You are a helpful ASSISTANT to USER and you pay clos
 
 def generate_prompt(new_prompt, history: List[Inst] = []):
     chat = []
+    system = []
+    print(history)
     for exchange in [Inst(**m).model_dump() for m in history]:
         if exchange["role"] == "user":
             chat.append(f"{BOS}{B_INST}{exchange['content']}{E_INST}")
         elif exchange["role"] == "assistant":
             chat.append(f"{exchange['content']} {EOS}")
+        elif exchange["role"] == "system":
+            system.append(f"{B_SYS} {exchange['content']} {E_SYS}")
 
     return f"""
-        {BOS} {B_INST} {B_SYS} {DEFAULT_SYSTEM_PROMPT} {E_SYS} Hi There! {E_INST} Hi. How can I help? {EOS} 
+        {BOS} {B_INST} {B_SYS} {DEFAULT_SYSTEM_PROMPT} {E_SYS} {''.join(system)} Hi There! {E_INST} Hi. How can I help? {EOS} 
             {''.join(chat)} {BOS} {B_INST} {new_prompt} {E_INST}
     """
 

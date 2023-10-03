@@ -29,14 +29,11 @@ class EmbeddingsSearchEngine:
                     """SELECT id, name FROM embeddings 
                 
                     ORDER BY vector <#> %s::vector LIMIT 1""",
-                    (
-                       
-                        embeddings,
-                    ),
+                    (embeddings,),
                 )
                 result = cur.fetchall()
                 print(result)
-                documents = [Document(id=row[0], name=row[1]) for row in result]
+                documents = [Document(id=row[0], body=row[1]) for row in result]
         return documents
 
     def find_similar_by_text(self, text: str) -> List[Document]:

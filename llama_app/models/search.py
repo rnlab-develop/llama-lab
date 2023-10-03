@@ -8,7 +8,7 @@ class SearchRequest(BaseModel):
 
 class Document(BaseModel):
     id: int
-    name: str
+    body: str
 
 
 class SearchResponse(BaseModel):
