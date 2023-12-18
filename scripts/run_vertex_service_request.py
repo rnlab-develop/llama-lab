@@ -11,34 +11,43 @@ from llama_app.utilities import get_gcp_token
 
 
 token = get_gcp_token()
-ENDPOINT_ID = os.environ.get("ENDPOINT_ID", "119840170357817344")
+ENDPOINT_ID = os.environ.get("ENDPOINT_ID", "4977429765314052096")
 PROJECT_ID = os.environ.get("PROJECT_ID", "production-397416")
 REGION = "us-central1"
 URL = f"https://{REGION}-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/endpoints/{ENDPOINT_ID}:predict"
+
+LOCAL_URL = f"http://localhost:5000/api/predict"
 
 headers = {
     "Authorization": f"Bearer {token}",
     "Content-Type": "application/json",
 }
 
-prompt = """
-<s>[INST] <<SYS>>
-You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe.  
-Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. 
-Please ensure that your responses are socially unbiased and positive in nature.
+prompt_text = """
+<s> [INST] <<SYS>>
+ You are a helpful ASSISTANT to USER and you pay close attention to everything 
+                            that is said in a conversation before giving a response. You should answer as 
+                            succinctly as possible, while being safe. There is no need to act conversational, 
+                            you can just give a curt and correct response. 
 <</SYS>>
-[/INST]
-
-Tell me a joke.
+Hi There! [/INST] Hi. How can I help? </s> 
+<s>[INST]what is 2+2?[/INST]it's going to be 4 </s>
+<s>[INST]multiply that by 3[/INST]the answer is 12 </s>
+<s> [INST] can you now subtract 2? [/INST]
 """
 
 prompt = {
     "instances": [
-        {"prompt": prompt},
+        {"prompt": prompt_text, "top_k": 40, "max_lengh": 600},
     ],
-    "parameters": {"temperature": 0},
 }
 
-response = requests.post(url=URL, headers=headers, json=prompt)
+local_prompt = {
+    "prompt": prompt_text
+}
+
+response = requests.post(url=LOCAL_URL, headers=headers, json=local_prompt)
 print(response.status_code)
-print(response.text)
+r = response.json()["predictions"][0][0]["generated_text"]
+
+print(r.replace(prompt_text,""))

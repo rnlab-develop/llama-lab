@@ -9,12 +9,8 @@ import numpy as np
 import requests
 from tqdm.auto import tqdm
 
-from llama_app.clients.embeddings import (
-    EmbedContent,
-    EmbeddingsService,
-    EmbedRequest,
-    RetrievalType,
-)
+from llama_app.clients.embeddings import (EmbedContent, EmbeddingsService,
+                                          EmbedRequest, RetrievalType)
 from llama_app.populate.html_prase import clean_html
 from llama_app.settings import SETTINGS
 

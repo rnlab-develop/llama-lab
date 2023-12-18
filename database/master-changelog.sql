@@ -10,3 +10,12 @@ CREATE TABLE embeddings (
     vector VECTOR(768) NOT NULL
 );
 
+CREATE TABLE tbl_chat_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL, 
+    room_id INTEGER NOT NULL,
+    timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    message JSONB NOT NULL
+);
+
+

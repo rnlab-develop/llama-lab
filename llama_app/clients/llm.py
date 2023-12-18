@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 import requests
 from pydantic import BaseModel
@@ -10,8 +10,8 @@ from llama_app.utilities import get_gcp_token
 
 class Prompt(BaseModel):
     prompt: str
-    top_k : int
-    max_length: int
+    top_k: Optional[int] = 40
+    max_length: Optional[int] = 600
 
 
 class VertexRequest(BaseModel):
