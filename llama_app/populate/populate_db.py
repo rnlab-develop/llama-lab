@@ -15,7 +15,7 @@ from llama_app.clients.embeddings import (
     EmbedRequest,
     RetrievalType,
 )
-from llama_app.populate.html_prase import clean_html
+from llama_app.populate.html_parse import clean_html
 from llama_app.settings import SETTINGS
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
@@ -143,3 +143,32 @@ def run_insert_dataset(conn):
     else:
         return "import already ran. success"
     return "success"
+
+
+def store_articles_to_disk(path):
+    import uuid
+    import os
+    for title in ARTICLE_TITLES:
+        text = clean_html(get_wikipedia_article(title))
+        with open(os.path.join(path, f"{str(uuid.uuid4())}.txt"), "w") as f:
+            f.write(text)
+
+def clean_directory(path):
+    import os
+    import shutil
+    shutil.rmtree(path)
+    os.mkdir(path)
+
+def store_embeddings(path):
+    from llama_index import SimpleDirectoryReader, VectorStoreIndex
+    from llama_index.embeddings import GooglePaLMEmbedding
+
+    
+
+    documents = SimpleDirectoryReader(path).load_data()
+    print("Document ID:", documents[0].doc_id)
+
+    index = VectorStoreIndex.from_documents(
+        documents, show_progress=True
+    )
+    index

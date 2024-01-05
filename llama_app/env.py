@@ -5,7 +5,7 @@ CREDENTIALS_ENV_VAR = "GOOGLE_APPLICATION_CREDENTIALS_JSON"
 
 
 def is_local_docker_env():
-    is_local = os.environ.get("ENV").lower() == "docker"
+    is_local = os.environ.get("ENV", "none").lower() == "docker"
     return is_local
 
 

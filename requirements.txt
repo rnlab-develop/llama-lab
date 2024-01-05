@@ -7,3 +7,5 @@ google-auth
 faker
 psycopg2-binary
 jinja2
+llama-index
+google-generativeai
