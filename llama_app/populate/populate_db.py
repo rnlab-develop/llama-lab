@@ -160,15 +160,28 @@ def clean_directory(path):
     os.mkdir(path)
 
 def store_embeddings(path):
-    from llama_index import SimpleDirectoryReader, VectorStoreIndex
+    from llama_index import SimpleDirectoryReader, VectorStoreIndex, ServiceContext
     from llama_index.embeddings import GooglePaLMEmbedding
+    from llama_index.node_parser import SentenceSplitter
 
-    
+    # https://cloud.google.com/docs/authentication/api-keys
+    service_context = ServiceContext.from_defaults(
+        llm=None,
+        embed_model=GooglePaLMEmbedding(
+            model_name="models/embedding-gecko-001",
+            api_key="AIzaSyCiFET2t_o1rvLNSBvWMAQ8iDFAMeiIoxo",
+        )
+    )
 
     documents = SimpleDirectoryReader(path).load_data()
     print("Document ID:", documents[0].doc_id)
 
-    index = VectorStoreIndex.from_documents(
-        documents, show_progress=True
-    )
-    index
+    parser = SentenceSplitter()
+    nodes = parser.get_nodes_from_documents(documents)
+
+    index = VectorStoreIndex(nodes, service_context=service_context)
+
+    retriever = index.as_retriever()
+
+    response = retriever.retrieve("What is bach's family like?")
+    print(str(response))
