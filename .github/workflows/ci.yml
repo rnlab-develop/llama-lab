@@ -9,4 +9,4 @@ jobs:
     - uses: actions/setup-python@v2
     - run: pip install ruff
     - run: | 
-      ruff check llama_app/
+        ruff check llama_app/
