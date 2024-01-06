@@ -1,6 +1,6 @@
 import enum
 import os
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from logging import getLogger
 from typing import Any, Optional
 

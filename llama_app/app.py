@@ -1,6 +1,5 @@
 import logging
 from dataclasses import asdict
-from pathlib import Path
 
 import psycopg2
 from fastapi import FastAPI
@@ -37,8 +36,8 @@ def _configure_db(_: FastAPI) -> None:
         cur = conn.cursor()
         cur.execute(("SELECT 1"))
         conn.commit()
-        logger.warn(f"[+] DB Connection succeeded!")
-        logger.warn(f"[!] Trying to populate database")
+        logger.warn("[+] DB Connection succeeded!")
+        logger.warn("[!] Trying to populate database")
         status = run_insert_dataset(conn=conn)
         logger.warn(f"[+] {status}")
     return
@@ -46,7 +45,6 @@ def _configure_db(_: FastAPI) -> None:
 
 _configure_routers(app)
 _configure_db(app)
-
 
 
 # at root redirect to /static/index.html
