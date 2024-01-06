@@ -148,16 +148,20 @@ def run_insert_dataset(conn):
 def store_articles_to_disk(path):
     import uuid
     import os
+
     for title in ARTICLE_TITLES:
         text = clean_html(get_wikipedia_article(title))
         with open(os.path.join(path, f"{str(uuid.uuid4())}.txt"), "w") as f:
             f.write(text)
 
+
 def clean_directory(path):
     import os
     import shutil
+
     shutil.rmtree(path)
     os.mkdir(path)
+
 
 def store_embeddings(path):
     from llama_index import SimpleDirectoryReader, VectorStoreIndex, ServiceContext
@@ -170,7 +174,7 @@ def store_embeddings(path):
         embed_model=GooglePaLMEmbedding(
             model_name="models/embedding-gecko-001",
             api_key="AIzaSyCiFET2t_o1rvLNSBvWMAQ8iDFAMeiIoxo",
-        )
+        ),
     )
 
     documents = SimpleDirectoryReader(path).load_data()

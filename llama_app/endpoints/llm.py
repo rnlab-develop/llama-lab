@@ -3,8 +3,13 @@ from dataclasses import asdict, dataclass, field
 from fastapi import APIRouter, Depends, HTTPException
 
 from llama_app.clients.embeddings import EmbedContent, EmbedRequest, gecko
-from llama_app.clients.llm import (BaseLLMService, GCPLlamaService,
-                                   MockLLMService, Prompt, VertexRequest)
+from llama_app.clients.llm import (
+    BaseLLMService,
+    GCPLlamaService,
+    MockLLMService,
+    Prompt,
+    VertexRequest,
+)
 from llama_app.clients.search import embeddings_search_engine
 from llama_app.models.search import SearchRequest, SearchResponse
 from llama_app.settings import SETTINGS, LLMType, SettingsException
