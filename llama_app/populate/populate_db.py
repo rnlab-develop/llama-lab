@@ -15,7 +15,7 @@ from llama_app.clients.embeddings import (
     EmbedRequest,
     RetrievalType,
 )
-from llama_app.populate.html_prase import clean_html
+from llama_app.populate.html_parse import clean_html
 from llama_app.settings import SETTINGS
 
 gecko = EmbeddingsService(SETTINGS.embeddings)
@@ -143,3 +143,45 @@ def run_insert_dataset(conn):
     else:
         return "import already ran. success"
     return "success"
+
+
+def store_articles_to_disk(path):
+    import uuid
+    import os
+    for title in ARTICLE_TITLES:
+        text = clean_html(get_wikipedia_article(title))
+        with open(os.path.join(path, f"{str(uuid.uuid4())}.txt"), "w") as f:
+            f.write(text)
+
+def clean_directory(path):
+    import os
+    import shutil
+    shutil.rmtree(path)
+    os.mkdir(path)
+
+def store_embeddings(path):
+    from llama_index import SimpleDirectoryReader, VectorStoreIndex, ServiceContext
+    from llama_index.embeddings import GooglePaLMEmbedding
+    from llama_index.node_parser import SentenceSplitter
+
+    # https://cloud.google.com/docs/authentication/api-keys
+    service_context = ServiceContext.from_defaults(
+        llm=None,
+        embed_model=GooglePaLMEmbedding(
+            model_name="models/embedding-gecko-001",
+            api_key="AIzaSyCiFET2t_o1rvLNSBvWMAQ8iDFAMeiIoxo",
+        )
+    )
+
+    documents = SimpleDirectoryReader(path).load_data()
+    print("Document ID:", documents[0].doc_id)
+
+    parser = SentenceSplitter()
+    nodes = parser.get_nodes_from_documents(documents)
+
+    index = VectorStoreIndex(nodes, service_context=service_context)
+
+    retriever = index.as_retriever()
+
+    response = retriever.retrieve("What is bach's family like?")
+    print(str(response))

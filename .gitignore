@@ -4,3 +4,7 @@ secrets
 *.db.lock
 __pycache__
 *env.sh
+.ipynb_checkpoints/
+.env
+.python-version
+data/
